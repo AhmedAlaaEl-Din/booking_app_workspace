@@ -22,7 +22,7 @@ For a beginner-friendly walkthrough of the code, see
 | Database         | `cloud_firestore`  |
 | State management | `provider`         |
 
-Target platform: **Android**.
+Target platform: **Android** (Phase 1 tested on a physical Android device).
 
 ## Project structure
 
@@ -101,6 +101,17 @@ The rules let each signed-in user read and create only their own
 ```
 flutter run
 ```
+
+## Troubleshooting
+
+- **`Android sdkmanager did not install NDK 28.2.13676358`**: install that NDK
+  version in Android Studio (SDK Manager → SDK Tools → "Show Package Details" →
+  NDK (Side by side)), or run `sdkmanager "ndk;28.2.13676358"`.
+- **`Could not close incremental caches`** during a Kotlin compile (common on
+  Windows when the project and the Pub cache are on different drives):
+  `android/gradle.properties` already sets `kotlin.incremental=false` to avoid
+  it. If it still happens, run `cd android; .\gradlew --stop; cd ..` and
+  `flutter clean`, then build again.
 
 ## Development
 
