@@ -6,7 +6,7 @@ import 'app_user.dart';
 /// The only class that talks to Firebase Auth and Firestore for auth.
 ///
 /// Methods throw [FirebaseException]s on failure; the caller decides how to
-/// present them (see `auth_error_messages.dart`).
+/// present them (see `core/utils/firebase_error_messages.dart`).
 class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

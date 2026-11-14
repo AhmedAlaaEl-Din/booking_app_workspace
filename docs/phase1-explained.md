@@ -49,7 +49,7 @@ The three layers inside `auth/` each have one job:
 | ----------- | ------------------------ | -------------------------------------------- |
 | `data`      | `auth_repository.dart`   | Calls Firebase Auth and Firestore            |
 |             | `app_user.dart`          | The user profile model                       |
-|             | `auth_error_messages.dart` | Firebase error code → friendly message     |
+| `core/utils`| `firebase_error_messages.dart` | Firebase error code → friendly message (moved here from `auth/data` in Phase 2) |
 | `providers` | `auth_notifier.dart`     | Current status, user, loading flag; actions  |
 | `screens`   | `auth_gate.dart`, `login_screen.dart`, `register_screen.dart` | UI |
 
@@ -163,7 +163,7 @@ Step by step:
    `AuthNotifier` keeps the profile from `register()` instead of overwriting
    it with a half-empty one. See the comments in `_onAuthStateChanged`.)
 6. On failure the `FirebaseException` is caught in `AuthNotifier._run`,
-   turned into a message by `authErrorMessage`, returned to the screen, and
+   turned into a message by `firebaseErrorMessage`, returned to the screen, and
    shown in a red snackbar. For example, `email-already-in-use` →
    *"An account with this email already exists. Try logging in."*
 
@@ -186,7 +186,8 @@ to the name and email stored on the Auth account.
 
 ### Logout
 
-Home's **Log out** button calls `signOut()`. `authStateChanges` emits `null`,
+The **Log out** button (on Home in Phase 1; on the Profile tab since
+Phase 2) calls `signOut()`. `authStateChanges` emits `null`,
 the status becomes `signedOut`, and the gate shows **Login**.
 
 ## 5. Tests
@@ -194,7 +195,7 @@ the status becomes `signedOut`, and the gate shows **Login**.
 | File                                         | What it checks                                     |
 | -------------------------------------------- | -------------------------------------------------- |
 | `test/core/validators_test.dart`             | Each validator accepts/rejects the right input     |
-| `test/features/auth/auth_error_messages_test.dart` | Firebase error codes map to friendly messages |
+| `test/core/firebase_error_messages_test.dart` | Firebase error codes map to friendly messages |
 | `test/features/auth/login_screen_test.dart`  | Widget tests: spinner → login screen; validation errors; wrong-password snackbar |
 
 Widget tests use `FakeAuthRepository` (`test/helpers/`). In Dart every class

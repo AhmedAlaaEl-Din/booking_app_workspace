@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../core/utils/firebase_error_messages.dart';
 import '../data/app_user.dart';
-import '../data/auth_error_messages.dart';
 import '../data/auth_repository.dart';
 
 enum AuthStatus { unknown, signedOut, signedIn }
@@ -84,7 +84,7 @@ class AuthNotifier extends ChangeNotifier {
       await action();
       return null;
     } catch (error) {
-      return authErrorMessage(error);
+      return firebaseErrorMessage(error);
     } finally {
       _isLoading = false;
       notifyListeners();

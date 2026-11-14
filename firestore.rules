@@ -3,17 +3,86 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // users/{uid}: each signed-in user can read and create only their own profile.
-    match /users/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
+    // ---------- Helpers ----------
 
-      // On create, the role must be "customer" so nobody can make themselves admin.
-      allow create: if request.auth != null
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function bookingDoc(bookingId) {
+      return /databases/$(database)/documents/bookings/$(bookingId);
+    }
+
+    // Must build the same ID as SlotCalculator.slotId() in the app.
+    function slotDoc(serviceId, startAt) {
+      return /databases/$(database)/documents/slots/$(serviceId + '_' + string(startAt.toMillis()));
+    }
+
+    // ---------- users/{uid} (unchanged from Phase 1) ----------
+
+    match /users/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn()
                     && request.auth.uid == uid
                     && request.resource.data.role == 'customer';
-
-      // Profile editing is not part of Phase 1.
       allow update, delete: if false;
+    }
+
+    // ---------- services/{serviceId} ----------
+
+    match /services/{serviceId} {
+      allow read: if signedIn();
+      allow write: if false; // Managed in the Firebase console only.
+    }
+
+    // ---------- bookings/{bookingId} ----------
+
+    match /bookings/{bookingId} {
+      allow read: if signedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['userId', 'serviceId', 'serviceName', 'startAt', 'durationMinutes', 'status', 'createdAt'])
+        && request.resource.data.keys().hasAll(['userId', 'serviceId', 'serviceName', 'startAt', 'durationMinutes', 'status', 'createdAt'])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'confirmed'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.startAt > request.time
+        && get(/databases/$(database)/documents/services/$(request.resource.data.serviceId)).data.active == true
+        && get(/databases/$(database)/documents/services/$(request.resource.data.serviceId)).data.name == request.resource.data.serviceName
+        && get(/databases/$(database)/documents/services/$(request.resource.data.serviceId)).data.durationMinutes == request.resource.data.durationMinutes
+        && getAfter(slotDoc(request.resource.data.serviceId, request.resource.data.startAt)).data.bookingId == bookingId;
+
+      allow update: if signedIn()
+        && resource.data.userId == request.auth.uid
+        && resource.data.status == 'confirmed'
+        && request.resource.data.status == 'cancelled'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && resource.data.startAt > request.time
+        && !existsAfter(slotDoc(resource.data.serviceId, resource.data.startAt));
+
+      allow delete: if false;
+    }
+
+    // ---------- slots/{slotId} ----------
+    // One document per taken time. No personal data.
+
+    match /slots/{slotId} {
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['serviceId', 'startAt', 'bookingId'])
+        && request.resource.data.keys().hasAll(['serviceId', 'startAt', 'bookingId'])
+        && slotId == request.resource.data.serviceId + '_' + string(request.resource.data.startAt.toMillis())
+        && getAfter(bookingDoc(request.resource.data.bookingId)).data.userId == request.auth.uid
+        && getAfter(bookingDoc(request.resource.data.bookingId)).data.status == 'confirmed'
+        && getAfter(bookingDoc(request.resource.data.bookingId)).data.serviceId == request.resource.data.serviceId
+        && getAfter(bookingDoc(request.resource.data.bookingId)).data.startAt == request.resource.data.startAt;
+
+      allow update: if false;
+
+      allow delete: if signedIn()
+        && get(bookingDoc(resource.data.bookingId)).data.userId == request.auth.uid
+        && getAfter(bookingDoc(resource.data.bookingId)).data.status == 'cancelled';
     }
 
     // Everything else is denied by default.

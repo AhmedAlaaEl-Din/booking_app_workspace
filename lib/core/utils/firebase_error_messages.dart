@@ -6,7 +6,7 @@ const String genericErrorMessage = 'Something went wrong. Please try again.';
 ///
 /// [FirebaseAuthException] (Auth) and Firestore errors are both
 /// [FirebaseException]s with a string `code`, so one switch covers both.
-String authErrorMessage(Object error) {
+String firebaseErrorMessage(Object error) {
   if (error is! FirebaseException) {
     return genericErrorMessage;
   }

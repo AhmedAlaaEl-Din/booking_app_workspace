@@ -73,6 +73,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Full name'),
                 textCapitalization: TextCapitalization.words,
+                // No personal keyboard suggestions (e.g. in demo recordings).
+                enableSuggestions: false,
+                autocorrect: false,
                 textInputAction: TextInputAction.next,
                 autofillHints: const [AutofillHints.name],
                 validator: Validators.name,
@@ -81,6 +84,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Email'),
                 keyboardType: TextInputType.emailAddress,
+                enableSuggestions: false,
+                autocorrect: false,
                 textInputAction: TextInputAction.next,
                 autofillHints: const [AutofillHints.email],
                 validator: Validators.email,

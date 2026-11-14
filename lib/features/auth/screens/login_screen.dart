@@ -81,6 +81,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Email'),
                 keyboardType: TextInputType.emailAddress,
+                // No personal keyboard suggestions (e.g. in demo recordings).
+                enableSuggestions: false,
+                autocorrect: false,
                 textInputAction: TextInputAction.next,
                 autofillHints: const [AutofillHints.email],
                 validator: Validators.email,
