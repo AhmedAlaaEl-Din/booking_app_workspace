@@ -1,0 +1,24 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "booking-app-demo-b2e34",
+          "appId": "1:1033961761188:android:f42dac9f251b7021ec7931",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "booking-app-demo-b2e34",
+          "configurations": {
+            "android": "1:1033961761188:android:f42dac9f251b7021ec7931"
+          }
+        }
+      }
+    }
+  }
+}

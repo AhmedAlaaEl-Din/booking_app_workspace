@@ -1,0 +1,21 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // users/{uid}: each signed-in user can read and create only their own profile.
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+
+      // On create, the role must be "customer" so nobody can make themselves admin.
+      allow create: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.role == 'customer';
+
+      // Profile editing is not part of Phase 1.
+      allow update, delete: if false;
+    }
+
+    // Everything else is denied by default.
+  }
+}
