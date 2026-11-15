@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     // Test output (screenshots, videos) and the test server's build folder
     ".next-e2e/**",
     ".next-live/**",
+    ".next-demo/**",
     "evidence/**",
     "test-results/**",
     "playwright-report/**",

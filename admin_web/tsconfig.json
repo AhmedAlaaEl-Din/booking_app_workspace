@@ -38,11 +38,14 @@
     ".next-e2e/types/**/*.ts",
     ".next-e2e/dev/types/**/*.ts",
     ".next-live/types/**/*.ts",
-    ".next-live/dev/types/**/*.ts"
+    ".next-live/dev/types/**/*.ts",
+    ".next-demo/types/**/*.ts",
+    ".next-demo/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     ".next-e2e",
-    ".next-live"
+    ".next-live",
+    ".next-demo"
   ]
 }

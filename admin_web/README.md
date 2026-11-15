@@ -100,6 +100,7 @@ Open <http://localhost:3000>. After editing `.env.local`, stop and restart
 | `npm test`          | Vitest unit tests (filters, counts, dates, validation)        |
 | `npm run test:e2e`  | Playwright smoke tests in Chromium (see below)                |
 | `npm run build`     | Production build                                              |
+| `npm run demo:video` | Portfolio video on local emulators with made-up data ([demo/README.md](demo/README.md)) |
 
 The Playwright tests need **no real account**. They start their own dev server
 on port 3100 with fake Firebase values (your `.env.local` is not used) and only

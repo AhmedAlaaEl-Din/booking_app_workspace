@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test --project=chromium",
     "test:e2e:video": "playwright test --project=video",
-    "test:live": "playwright test --config playwright.live.config.ts"
+    "test:live": "playwright test --config playwright.live.config.ts",
+    "demo:video": "playwright test --config demo/playwright.demo.config.ts"
   },
   "dependencies": {
     "firebase": "^13.3.0",
