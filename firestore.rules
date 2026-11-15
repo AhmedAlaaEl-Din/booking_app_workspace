@@ -13,15 +13,38 @@ service cloud.firestore {
       return /databases/$(database)/documents/bookings/$(bookingId);
     }
 
+    // Phase 3: true if the signed-in user's profile has role "admin".
+    // get() reads users/{uid}: one extra document read per request that
+    // reaches this check. Roles can only be set in the Firebase console.
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Phase 3: the only shape a service document may have.
+    // Same limits as admin_web/lib/validation.ts.
+    function validService(data) {
+      return data.keys().hasOnly(['name', 'description', 'durationMinutes', 'price', 'active'])
+        && data.keys().hasAll(['name', 'description', 'durationMinutes', 'price', 'active'])
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 60
+        && data.description is string && data.description.size() <= 300
+        // Any whole number: services typed into the console may be stored as 30.0.
+        && data.durationMinutes is number && data.durationMinutes == math.floor(data.durationMinutes)
+        && data.durationMinutes >= 1 && data.durationMinutes <= 480
+        && data.price is number && data.price >= 0
+        && data.active is bool;
+    }
+
     // Must build the same ID as SlotCalculator.slotId() in the app.
     function slotDoc(serviceId, startAt) {
       return /databases/$(database)/documents/slots/$(serviceId + '_' + string(startAt.toMillis()));
     }
 
-    // ---------- users/{uid} (unchanged from Phase 1) ----------
+    // ---------- users/{uid} ----------
 
     match /users/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
+      allow read: if isAdmin(); // Phase 3: customer names and emails.
       allow create: if signedIn()
                     && request.auth.uid == uid
                     && request.resource.data.role == 'customer';
@@ -32,13 +55,17 @@ service cloud.firestore {
 
     match /services/{serviceId} {
       allow read: if signedIn();
-      allow write: if false; // Managed in the Firebase console only.
+      // Phase 3: admins add and edit services. Nobody deletes them (old
+      // bookings refer to them); deactivate instead.
+      allow create, update: if isAdmin() && validService(request.resource.data);
+      allow delete: if false;
     }
 
     // ---------- bookings/{bookingId} ----------
 
     match /bookings/{bookingId} {
       allow read: if signedIn() && resource.data.userId == request.auth.uid;
+      allow read: if isAdmin(); // Phase 3: all bookings.
 
       allow create: if signedIn()
         && request.resource.data.keys().hasOnly(['userId', 'serviceId', 'serviceName', 'startAt', 'durationMinutes', 'status', 'createdAt'])
@@ -54,6 +81,15 @@ service cloud.firestore {
 
       allow update: if signedIn()
         && resource.data.userId == request.auth.uid
+        && resource.data.status == 'confirmed'
+        && request.resource.data.status == 'cancelled'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && resource.data.startAt > request.time
+        && !existsAfter(slotDoc(resource.data.serviceId, resource.data.startAt));
+
+      // Phase 3: an admin cancels any customer's booking. The same checks as
+      // above, without "it's your own booking".
+      allow update: if isAdmin()
         && resource.data.status == 'confirmed'
         && request.resource.data.status == 'cancelled'
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
@@ -82,6 +118,10 @@ service cloud.firestore {
 
       allow delete: if signedIn()
         && get(bookingDoc(resource.data.bookingId)).data.userId == request.auth.uid
+        && getAfter(bookingDoc(resource.data.bookingId)).data.status == 'cancelled';
+
+      // Phase 3: an admin frees the slot of a booking they cancel.
+      allow delete: if isAdmin()
         && getAfter(bookingDoc(resource.data.bookingId)).data.status == 'cancelled';
     }
 

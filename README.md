@@ -18,7 +18,7 @@ This is a portfolio project, built in phases.
 - Form validation, loading states, and friendly error messages
 - Material 3 theme (light and dark), works on small screens
 
-**Phase 2 (current): services and bookings**
+**Phase 2: services and bookings**
 
 - Bottom navigation: Services, My bookings, Profile
 - Services list, read from Firestore
@@ -28,9 +28,19 @@ This is a portfolio project, built in phases.
   status; cancel an upcoming booking
 - Local reminder notification one hour before each booking (no server needed)
 
+**Phase 3 (current): web admin dashboard** in [`admin_web/`](admin_web/README.md)
+
+- Next.js + TypeScript + Tailwind CSS, same Firebase project and data as the app
+- Only accounts with `role: "admin"` can sign in; everyone else sees "Access denied"
+- Overview (today, upcoming, cancelled), all bookings with customer details,
+  filters and live updates; cancel a booking (frees the slot, like the app)
+- Add, edit, activate and deactivate services
+- Setup, tests and creating the first admin: [admin_web/README.md](admin_web/README.md)
+
 Beginner-friendly walkthroughs of the code:
 [docs/phase1-explained.md](docs/phase1-explained.md) ·
-[docs/phase2-explained.md](docs/phase2-explained.md)
+[docs/phase2-explained.md](docs/phase2-explained.md) ·
+[docs/phase3-explained.md](docs/phase3-explained.md)
 
 ## Tech stack
 
@@ -72,7 +82,8 @@ lib/
       widgets/           BookingCard
     profile/             Profile screen (name, email, logout)
 test/                    Unit and widget tests
-firestore.rules          Firestore security rules
+firestore.rules          Firestore security rules (shared with the dashboard)
+admin_web/               Phase 3: the web admin dashboard (Next.js), see its README
 ```
 
 ## Getting started
@@ -125,9 +136,12 @@ firebase deploy --only firestore:rules --project <your-firebase-project-id>
 
 In short: users read/create only their own profile; signed-in users can read
 services and the anonymous `slots`; customers create and read only their own
-bookings and can only change one from `confirmed` to `cancelled`. See
+bookings and can only change one from `confirmed` to `cancelled`. Admins
+(`role: "admin"`, set in the console) can also read all bookings and users,
+cancel any upcoming booking, and add/edit services. See
 [docs/phase2-explained.md](docs/phase2-explained.md#5-the-security-rules-line-by-line)
-for a line-by-line explanation.
+and [docs/phase3-explained.md](docs/phase3-explained.md#5-how-the-rules-protect-the-data)
+for explanations.
 
 ### 4. Add the sample services
 
@@ -192,10 +206,10 @@ dart format .     # format the code
 | ----------- | --------- | ------------------ |
 | `name`      | string    | `"Ahmed"`          |
 | `email`     | string    | `"ahmed@mail.com"` |
-| `role`      | string    | `"customer"`       |
+| `role`      | string    | `"customer"` (or `"admin"`, set in the console only) |
 | `createdAt` | timestamp | set by the server  |
 
-`services/{serviceId}` (added in the console)
+`services/{serviceId}` (added in the console or the admin dashboard)
 
 | Field             | Type    | Example                 |
 | ----------------- | ------- | ----------------------- |
@@ -205,7 +219,7 @@ dart format .     # format the code
 | `price`           | number  | `25`                    |
 | `active`          | boolean | `true`                  |
 
-`bookings/{autoId}` (readable only by its owner)
+`bookings/{autoId}` (readable by its owner and by admins)
 
 | Field             | Type      | Example                       |
 | ----------------- | --------- | ----------------------------- |
