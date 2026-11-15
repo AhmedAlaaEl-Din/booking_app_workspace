@@ -99,6 +99,67 @@ void main() {
     });
   });
 
+  group('splitBookings', () {
+    final now = DateTime(2026, 11, 15, 12);
+
+    Booking make(String id, DateTime startAt, BookingStatus status) => Booking(
+      id: id,
+      userId: 'user-1',
+      serviceId: 'haircut',
+      serviceName: 'Haircut',
+      startAt: startAt,
+      durationMinutes: 30,
+      status: status,
+    );
+
+    final soonConfirmed = make(
+      'a',
+      DateTime(2026, 11, 16, 9),
+      BookingStatus.confirmed,
+    );
+    final laterConfirmed = make(
+      'b',
+      DateTime(2026, 11, 20, 9),
+      BookingStatus.confirmed,
+    );
+    final futureCancelled = make(
+      'c',
+      DateTime(2026, 11, 18, 9),
+      BookingStatus.cancelled,
+    );
+    final pastConfirmed = make(
+      'd',
+      DateTime(2026, 11, 10, 9),
+      BookingStatus.confirmed,
+    );
+    final pastCancelled = make(
+      'e',
+      DateTime(2026, 11, 1, 9),
+      BookingStatus.cancelled,
+    );
+
+    final split = splitBookings([
+      pastCancelled,
+      laterConfirmed,
+      futureCancelled,
+      soonConfirmed,
+      pastConfirmed,
+    ], now);
+
+    List<String> ids(List<Booking> list) => list.map((b) => b.id).toList();
+
+    test('upcoming: only confirmed future bookings, soonest first', () {
+      expect(ids(split.upcoming), ['a', 'b']);
+    });
+
+    test(
+      'past: started or cancelled (even if in the future), newest first',
+      () {
+        expect(ids(split.past), ['c', 'd', 'e']);
+      },
+    );
+  });
+
   group('BookingReminders.notificationId', () {
     test('is stable and a positive 31-bit number', () {
       final id = BookingReminders.notificationId('AbC123xyz');

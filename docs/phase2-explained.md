@@ -9,6 +9,7 @@ they work, in plain terms. It builds on [phase1-explained.md](phase1-explained.m
 lib/
   core/
     constants/booking_constants.dart  Opening hours, slot length, 14-day window, reminder time
+    navigation/snack_bar_dismisser.dart  Hides snackbars when the screen or tab changes
     utils/formatters.dart             Dates, times, prices, durations for display
     utils/firebase_error_messages.dart  (moved here from auth/, now shared by all features)
     widgets/state_views.dart          LoadingView, EmptyView, ErrorView
@@ -25,7 +26,7 @@ lib/
       utils/slot_calculator.dart      Which days and times can be booked (pure logic)
       screens/choose_time_screen.dart Pick a date, then a time
       screens/confirm_booking_screen.dart  Review and save
-      screens/my_bookings_screen.dart Tab 2: upcoming and past bookings
+      screens/my_bookings_screen.dart Tab 2: Upcoming (confirmed) and Past (finished or cancelled)
       widgets/booking_card.dart       One booking, with its Cancel button
     profile/screens/profile_screen.dart  Tab 3: name, email, logout
 ```
@@ -49,6 +50,25 @@ Services tab ──tap a service──▶ ChooseTimeScreen ──Continue──�
      ▲                                                              │
      └──────────────── popUntil(first route) after saving ◀─────────┘
 ```
+
+### Snackbars disappear when the screen changes
+
+A snackbar (for example "Booking cancelled") belongs to the screen where it
+appeared, so it's dismissed as soon as the user moves elsewhere:
+
+- **Pushing or popping a screen, or opening/closing a dialog:**
+  `SnackBarDismisser` (`core/navigation/`) is a `NavigatorObserver`. The
+  `Navigator` calls it on every push and pop, a bit like a Qt event filter on
+  the navigation stack. It clears snackbars through a `GlobalKey` to the
+  app's `ScaffoldMessenger` (the object that displays snackbars).
+- **Switching tabs:** the bottom `NavigationBar` and the Upcoming/Past
+  `TabBar` (by tap or by swipe) call `dismissSnackBars(context)` when the
+  selected index changes.
+- **Login ↔ Home:** `AuthGate` swaps widgets instead of navigating, so it
+  listens to `AuthNotifier` and clears snackbars when the auth status changes.
+
+The booking flow still shows its "Booked ..." message: it pops back to the
+tabs first (dismissing old snackbars), *then* shows the new one.
 
 ## 3. Days and time slots
 
@@ -146,6 +166,12 @@ One day has at most a few dozen slots, so this is cheap.)
 `cancelBooking()` runs a transaction that sets the booking's `status` to
 `cancelled` **and deletes its slot**. The rules require both to happen
 together, so a cancelled booking never keeps blocking its time.
+
+In **My bookings**, `splitBookings()` (in `booking.dart`) puts only
+*confirmed bookings that haven't started* under **Upcoming**. Everything else
+(finished, or cancelled even if its date is still ahead) goes under
+**Past**, newest first. So a booking moves from Upcoming to Past the moment
+it's cancelled.
 
 ### Known limitation
 
@@ -452,6 +478,7 @@ services with every field and type. Use readable document IDs such as
 | File                                              | What it checks |
 | ------------------------------------------------- | -------------- |
 | `test/features/bookings/slot_calculator_test.dart`| 14-day window, month/year rollover, 16 slots for 30 min, closing time for long services, no past times today, slot ID format |
-| `test/features/bookings/booking_test.dart`        | Reading from Firestore data, unknown status, round-trip, end time, who can cancel, stable reminder IDs |
+| `test/features/bookings/booking_test.dart`        | Reading from Firestore data, unknown status, round-trip, end time, who can cancel, Upcoming/Past split (cancelled → Past), stable reminder IDs |
+| `test/core/snack_bar_dismisser_test.dart`         | Snackbar hidden when opening or leaving a screen; a snackbar shown right after going back stays |
 | `test/features/services/service_test.dart`        | Numbers stored as int or double, safe defaults |
 | Phase 1 tests                                     | Validators, error messages, login widget tests |

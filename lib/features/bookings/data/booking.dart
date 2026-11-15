@@ -39,9 +39,12 @@ class Booking {
 
   bool isUpcoming(DateTime now) => startAt.isAfter(now);
 
-  /// Only confirmed bookings that haven't started yet can be cancelled.
-  bool canCancel(DateTime now) =>
+  /// Confirmed and not started yet: shown in the "Upcoming" tab.
+  bool isActiveUpcoming(DateTime now) =>
       status == BookingStatus.confirmed && isUpcoming(now);
+
+  /// Only confirmed bookings that haven't started yet can be cancelled.
+  bool canCancel(DateTime now) => isActiveUpcoming(now);
 
   factory Booking.fromMap(String id, Map<String, dynamic> data) {
     return Booking(
@@ -71,4 +74,21 @@ class Booking {
       'status': status.name,
     };
   }
+}
+
+/// Splits bookings for the two "My bookings" tabs:
+/// - upcoming: confirmed and not started yet, soonest first;
+/// - past: everything else (already started, or cancelled), most recent first.
+///
+/// Sorting happens here rather than with orderBy() in the query, which
+/// together with where('userId', ...) would need a composite index.
+({List<Booking> upcoming, List<Booking> past}) splitBookings(
+  List<Booking> bookings,
+  DateTime now,
+) {
+  final upcoming = bookings.where((b) => b.isActiveUpcoming(now)).toList()
+    ..sort((a, b) => a.startAt.compareTo(b.startAt));
+  final past = bookings.where((b) => !b.isActiveUpcoming(now)).toList()
+    ..sort((a, b) => b.startAt.compareTo(a.startAt));
+  return (upcoming: upcoming, past: past);
 }

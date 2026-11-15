@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../core/navigation/snack_bar_dismisser.dart';
 import '../../bookings/screens/my_bookings_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../services/screens/services_screen.dart';
@@ -26,7 +27,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
-        onDestinationSelected: (index) => setState(() => _currentIndex = index),
+        onDestinationSelected: (index) {
+          if (index == _currentIndex) return;
+          dismissSnackBars(context); // A snackbar belongs to the old tab.
+          setState(() => _currentIndex = index);
+        },
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.content_cut_outlined),
