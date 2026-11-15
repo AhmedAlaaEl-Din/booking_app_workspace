@@ -10,7 +10,9 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test --project=chromium",
+    "test:e2e:video": "playwright test --project=video",
+    "test:live": "playwright test --config playwright.live.config.ts"
   },
   "dependencies": {
     "firebase": "^13.3.0",

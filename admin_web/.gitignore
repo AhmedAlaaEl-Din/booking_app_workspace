@@ -18,6 +18,8 @@
 
 # next.js
 /.next/
+/.next-e2e/
+/.next-live/
 /out/
 
 # production
@@ -36,6 +38,7 @@ yarn-error.log*
 # env files: .env.local holds your Firebase config. Only the empty template is committed.
 .env*
 !.env.example
+!.env.e2e.example
 
 # vercel
 .vercel

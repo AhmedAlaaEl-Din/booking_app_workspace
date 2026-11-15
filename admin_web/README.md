@@ -109,6 +109,24 @@ first time, install the browser with `npx playwright install chromium`.
 Screenshots of every test go to `evidence/screenshots/`, and videos of failed
 tests to `evidence/test-results/`. The `evidence/` folder is git-ignored.
 
+## Live test (real Firebase, recorded)
+
+`npm run test:live` runs the real dashboard against your Firebase project and
+records one video to `evidence/live-results/`. It needs:
+
+- `.env.local` filled in, and the Phase 3 rules deployed
+- `.env.e2e.local` (copy `.env.e2e.example`) with a **demo** admin and a
+  **demo** customer login; both are shown in the video
+- only demo accounts and demo bookings in the project, because the Overview
+  and Bookings pages are filmed
+
+What it does: the customer gets "Access denied"; a wrong password shows an
+error; the admin signs in; it adds (or edits) and activates a service called
+"E2E test service"; the customer books a slot 13 days ahead in the
+background and the row appears live; the admin cancels it ("Keep booking"
+first); it checks in Firestore that the booking is cancelled and the slot is
+gone; it deactivates the test service; and it signs out at phone width.
+
 ## Manual test checklist
 
 Use demo accounts and demo data only. You need one admin account and one

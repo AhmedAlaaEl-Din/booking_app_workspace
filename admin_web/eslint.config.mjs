@@ -12,7 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Test output (screenshots, videos)
+    // Test output (screenshots, videos) and the test server's build folder
+    ".next-e2e/**",
+    ".next-live/**",
     "evidence/**",
     "test-results/**",
     "playwright-report/**",

@@ -14,7 +14,24 @@ export default defineConfig({
     screenshot: "on", // A screenshot at the end of every test.
     video: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    // `npm run test:e2e`: the normal run.
+    {
+      name: "chromium",
+      testIgnore: /walkthrough/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    // `npm run test:e2e:video`: the same tests, every one filmed, with each
+    // step slowed down a little so the videos are easy to follow.
+    {
+      name: "video",
+      use: {
+        ...devices["Desktop Chrome"],
+        video: { mode: "on", size: { width: 1280, height: 720 } },
+        launchOptions: { slowMo: 400 },
+      },
+    },
+  ],
   webServer: {
     command: `npx next dev --port ${PORT}`,
     url: `http://localhost:${PORT}/login`,
@@ -23,6 +40,7 @@ export default defineConfig({
     // Values from the environment win over .env.local, so your real config
     // is never used by the tests.
     env: {
+      NEXT_DIST_DIR: ".next-e2e",
       NEXT_PUBLIC_FIREBASE_API_KEY: "fake-api-key-for-tests",
       NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "demo-test.firebaseapp.com",
       NEXT_PUBLIC_FIREBASE_PROJECT_ID: "demo-test",
