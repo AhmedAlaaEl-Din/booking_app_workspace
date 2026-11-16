@@ -31,6 +31,8 @@ class _ConfirmBookingScreenState extends State<ConfirmBookingScreen> {
   bool _isSaving = false;
 
   Future<void> _confirm() async {
+    // Two taps in the same frame both arrive before the button is disabled.
+    if (_isSaving) return;
     // Read everything that needs `context` before the first await.
     final repository = context.read<BookingRepository>();
     final reminders = context.read<BookingReminders>();

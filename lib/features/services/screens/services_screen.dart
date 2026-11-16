@@ -23,6 +23,21 @@ class _ServicesScreenState extends State<ServicesScreen> {
       .read<ServicesRepository>()
       .watchActiveServices();
 
+  // True while the booking flow is being opened, so a double tap on a card
+  // doesn't open it twice.
+  bool _isOpening = false;
+
+  Future<void> _open(Service service) async {
+    if (_isOpening) return;
+    _isOpening = true;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ChooseTimeScreen(service: service),
+      ),
+    );
+    _isOpening = false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,8 +62,10 @@ class _ServicesScreenState extends State<ServicesScreen> {
             padding: const EdgeInsets.all(AppSpacing.md),
             itemCount: services.length,
             separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-            itemBuilder: (context, index) =>
-                _ServiceCard(service: services[index]),
+            itemBuilder: (context, index) => _ServiceCard(
+              service: services[index],
+              onTap: () => _open(services[index]),
+            ),
           );
         },
       ),
@@ -57,9 +74,10 @@ class _ServicesScreenState extends State<ServicesScreen> {
 }
 
 class _ServiceCard extends StatelessWidget {
-  const _ServiceCard({required this.service});
+  const _ServiceCard({required this.service, required this.onTap});
 
   final Service service;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -67,11 +85,7 @@ class _ServiceCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias, // Keeps the tap ripple inside the corners.
       child: InkWell(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => ChooseTimeScreen(service: service),
-          ),
-        ),
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(

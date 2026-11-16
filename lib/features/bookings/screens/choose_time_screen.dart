@@ -41,13 +41,18 @@ class _ChooseTimeScreenState extends State<ChooseTimeScreen> {
     });
   }
 
-  void _continue(DateTime slot) {
-    Navigator.of(context).push(
+  bool _isOpening = false; // Blocks a double tap on "Continue".
+
+  Future<void> _continue(DateTime slot) async {
+    if (_isOpening) return;
+    _isOpening = true;
+    await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) =>
             ConfirmBookingScreen(service: widget.service, startAt: slot),
       ),
     );
+    _isOpening = false;
   }
 
   @override

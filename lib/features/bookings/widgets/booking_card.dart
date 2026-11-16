@@ -21,8 +21,12 @@ class BookingCard extends StatefulWidget {
 
 class _BookingCardState extends State<BookingCard> {
   bool _isCancelling = false;
+  bool _isAsking = false; // The confirmation dialog is open.
 
   Future<void> _cancel() async {
+    // A double tap must not open two dialogs or cancel twice.
+    if (_isAsking || _isCancelling) return;
+    _isAsking = true;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -45,6 +49,7 @@ class _BookingCardState extends State<BookingCard> {
         ],
       ),
     );
+    _isAsking = false;
     if (confirmed != true || !mounted) return;
 
     final repository = context.read<BookingRepository>();
