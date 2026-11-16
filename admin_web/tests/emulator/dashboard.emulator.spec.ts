@@ -41,8 +41,10 @@ test("a wrong password shows a friendly error", async ({ page }) => {
   await page.getByLabel("Email").fill(ADMIN.email);
   await page.getByLabel("Password").fill("not-the-password");
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("alert")).toBeVisible();
-  await expect(page.getByRole("alert")).not.toContainText(/auth\/|Firebase/);
+  // Not the empty Next.js route announcer, which also has role="alert".
+  const error = page.getByRole("alert").filter({ hasText: /\S/ });
+  await expect(error).toBeVisible();
+  await expect(error).not.toContainText(/auth\/|Firebase/);
 });
 
 test("admin: overview, filter, cancel (frees the slot), edit service, sign out", async ({ page }) => {
