@@ -10,13 +10,17 @@
 // never to Google. All names and emails are fictional; every login works only
 // inside the emulator.
 //
-// SEED_PROJECT_ID picks the emulator namespace (default "demo-booking"). The
-// Flutter debug app talks to the emulators under its own project ID, so the
-// device run seeds that namespace too (still only on the local emulator).
+// SEED_PROJECT_ID picks the Firestore namespace (default "demo-booking").
+// Auth accounts always go to the emulator's default project, "demo-booking":
+// the client SDKs (web and Android) sign in without naming a project, so the
+// Auth emulator files them there. The Flutter debug app's Firestore uses the
+// app's own project ID (Android ignores options passed from Dart), so the
+// device run sets SEED_PROJECT_ID to it. Both stay on the local emulator.
 
 const FIRESTORE = process.env.FIRESTORE_EMULATOR_HOST;
 const AUTH = process.env.FIREBASE_AUTH_EMULATOR_HOST;
 const PROJECT_ID = process.env.SEED_PROJECT_ID ?? "demo-booking";
+const AUTH_PROJECT_ID = "demo-booking";
 
 function isLocal(host: string | undefined): host is string {
   return !!host && /^(127\.0\.0\.1|localhost|\[::1\]):\d+$/.test(host);
@@ -126,7 +130,7 @@ async function put(path: string, data: Record<string, string | number | boolean 
 async function createAccount(email: string): Promise<string> {
   const { localId } = await call(
     "POST",
-    `${AUTH_URL}/identitytoolkit.googleapis.com/v1/projects/${PROJECT_ID}/accounts`,
+    `${AUTH_URL}/identitytoolkit.googleapis.com/v1/projects/${AUTH_PROJECT_ID}/accounts`,
     { email, password: DEMO_PASSWORD },
   );
   return localId;
@@ -135,7 +139,7 @@ async function createAccount(email: string): Promise<string> {
 export async function seed() {
   // Start from an empty emulator every time.
   await call("DELETE", `${FIRESTORE_URL}/emulator/v1/projects/${PROJECT_ID}/databases/(default)/documents`);
-  await call("DELETE", `${AUTH_URL}/emulator/v1/projects/${PROJECT_ID}/accounts`);
+  await call("DELETE", `${AUTH_URL}/emulator/v1/projects/${AUTH_PROJECT_ID}/accounts`);
 
   const created = at(-30, 9, 0);
   const adminUid = await createAccount(ADMIN.email);
