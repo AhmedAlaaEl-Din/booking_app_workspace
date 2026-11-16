@@ -30,6 +30,10 @@ This is a portfolio project, built in phases.
 
 **Phase 3 (current): web admin dashboard** in [`admin_web/`](admin_web/README.md)
 
+**▶ [Watch the admin dashboard demo](https://youtu.be/4zeIR4EaPKc)**
+
+[![Admin dashboard demo video](https://img.youtube.com/vi/4zeIR4EaPKc/hqdefault.jpg)](https://youtu.be/4zeIR4EaPKc)
+
 - Next.js + TypeScript + Tailwind CSS, same Firebase project and data as the app
 - Only accounts with `role: "admin"` can sign in; everyone else sees "Access denied"
 - Overview (today, upcoming, cancelled), all bookings with customer details,
