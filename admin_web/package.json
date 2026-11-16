@@ -10,6 +10,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:rules": "vitest run --config vitest.rules.config.mts",
+    "test:rules:proposed": "vitest run --config vitest.rules.config.mts --mode proposed",
     "test:e2e": "playwright test --project=chromium",
     "test:e2e:video": "playwright test --project=video",
     "test:live": "playwright test --config playwright.live.config.ts",
@@ -24,6 +26,7 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
     "@playwright/test": "^1.65.1",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^26.6.6",

@@ -20,3 +20,10 @@ Delete these in the Firebase console: **Authentication → Users**, and
 **Firestore → Data**. Afterwards, `admin_web/.env.e2e.local` points to accounts
 that no longer exist. Delete it, or re-run `tests/live/create-demo-accounts.mjs`
 before the next `npm run test:live`.
+
+## 2. Review and deploy the proposed Firestore rules
+
+`firestore.rules.proposed` closes three gaps: bookings too far ahead, start
+times off the 30-minute grid, and loose profile documents. Details and the
+access table are in `docs/phase4-security.md`. Rules tests pass against both
+files (22/22 each). Deploying is your call.
