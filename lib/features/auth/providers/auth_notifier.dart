@@ -78,6 +78,8 @@ class AuthNotifier extends ChangeNotifier {
 
   /// Runs [action] with [isLoading] set, converting errors to messages.
   Future<String?> _run(Future<void> Function() action) async {
+    // A second tap while a request is running is ignored.
+    if (_isLoading) return null;
     _isLoading = true;
     notifyListeners();
     try {

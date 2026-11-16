@@ -1,226 +1,112 @@
-# Booking App
+# Salon booking app + admin dashboard
 
-**▶ [Watch the demo video](https://www.youtube.com/shorts/xjE2lHMbqQc)**
+A complete booking system for a small salon or clinic. Customers book
+appointments in an **Android app**, and the owner manages everything in a **web
+dashboard**. Both share one secure Firebase backend.
 
-[![Booking App demo video](https://img.youtube.com/vi/xjE2lHMbqQc/hqdefault.jpg)](https://www.youtube.com/shorts/xjE2lHMbqQc)
+| Customer app (Flutter) | Admin dashboard (Next.js) |
+| ---------------------- | ------------------------- |
+| [![Customer app demo](https://img.youtube.com/vi/Vx8c27PwZs8/hqdefault.jpg)](https://youtube.com/shorts/Vx8c27PwZs8) | [![Admin dashboard demo](https://img.youtube.com/vi/4zeIR4EaPKc/hqdefault.jpg)](https://youtu.be/4zeIR4EaPKc) |
+| ▶ [Watch the app demo](https://youtube.com/shorts/Vx8c27PwZs8) | ▶ [Watch the dashboard demo](https://youtu.be/4zeIR4EaPKc) |
+| | _Phase 4 dashboard recording (with title card): `<VIDEO LINK>`_ |
 
-**Booking reminder**: a local notification one hour before the appointment:
+<!-- Screenshots: replace with phone captures from demo_videos/ when ready. -->
+| Services | Choose a time | My bookings | Reminder |
+| -------- | ------------- | ----------- | -------- |
+| `<SCREENSHOT: services>` | `<SCREENSHOT: choose time>` | `<SCREENSHOT: my bookings>` | <img src="docs/images/reminder_notification.png" alt="Reminder: Upcoming: Haircut. Your booking starts at 12:00." width="220"> |
 
-<img src="docs/images/reminder_notification.png" alt="Reminder notification: Upcoming: Haircut. Your booking starts at 12:00." width="480">
+## Features
 
-A booking app for a small clinic or salon, built with **Flutter** and **Firebase**.
-This is a portfolio project, built in phases.
+**Customer app (Android)**
+- Sign up and log in; the session is remembered
+- Browse services with price and duration
+- Book in three taps: service → date (next 14 days) → free time
+- Times already taken are greyed out live; **double bookings are impossible**
+- My bookings: upcoming and past, cancel with one tap (the time is freed for others)
+- A reminder notification one hour before each appointment
+- Light and dark mode, large-text friendly, clear messages instead of errors
 
-**Phase 1: setup and authentication**
+**Admin dashboard (web)**
+- Only admin accounts get in; everyone else sees "Access denied"
+- Overview: today's appointments, upcoming and cancelled counts
+- All bookings with customer details, filters by date, status and service, live updates
+- Cancel any booking (frees the slot), add, edit and deactivate services
 
-- Register with name, email and password; a profile is stored in Firestore
-- Log in / log out, with the session remembered between app launches
-- Form validation, loading states, and friendly error messages
-- Material 3 theme (light and dark), works on small screens
+## How it works
 
-**Phase 2 (current): services and bookings**
+```mermaid
+flowchart LR
+  subgraph Clients
+    A["Customer app<br/>Flutter · Android"]
+    W["Admin dashboard<br/>Next.js · TypeScript"]
+  end
+  subgraph Firebase["Firebase (Spark, free plan)"]
+    Auth["Authentication<br/>email + password"]
+    R{{"Security rules<br/>firestore.rules"}}
+    DB[("Cloud Firestore<br/>users · services · bookings · slots")]
+  end
+  N["Local reminder<br/>on the phone"]
+  A -- sign in --> Auth
+  W -- sign in --> Auth
+  A -- book / cancel --> R
+  W -- manage --> R
+  R --> DB
+  A -. schedules .-> N
+```
 
-- Bottom navigation: Services, My bookings, Profile
-- Services list, read from Firestore
-- Booking flow: service → date (next 14 days) → free time slot → confirm
-- Double booking prevented by Firestore itself (deterministic slot IDs + rules)
-- My bookings: Upcoming (confirmed) and Past (finished or cancelled), with
-  status; cancel an upcoming booking
-- Local reminder notification one hour before each booking (no server needed)
-
-Beginner-friendly walkthroughs of the code:
-[docs/phase1-explained.md](docs/phase1-explained.md) ·
-[docs/phase2-explained.md](docs/phase2-explained.md)
+There is no custom server. Each app talks to Firebase directly, and the
+**security rules** decide what every user may read or write. A booking and its
+time slot are written together in one transaction; the slot's ID is the service
+plus the start time, so a second booking for the same time is rejected by the
+database itself.
 
 ## Tech stack
 
-| Purpose                 | Package                       |
-| ----------------------- | ----------------------------- |
-| Firebase setup          | `firebase_core`               |
-| Authentication          | `firebase_auth`               |
-| Database                | `cloud_firestore`             |
-| State management        | `provider`                    |
-| Date/time formatting    | `intl`                        |
-| Reminder notifications  | `flutter_local_notifications` |
-| Notification scheduling | `timezone`                    |
+| Part | Built with |
+| ---- | ---------- |
+| Customer app | Flutter, Provider, `cloud_firestore`, `firebase_auth`, `flutter_local_notifications` |
+| Admin dashboard | Next.js (App Router), React, TypeScript, Tailwind CSS, Firebase Web SDK |
+| Backend | Firebase Authentication, Cloud Firestore, security rules (no Cloud Functions) |
+| Testing | Flutter widget tests, Vitest, Playwright, `@firebase/rules-unit-testing`, Firebase Emulator Suite |
 
-Runs on the free Firebase **Spark** plan: no Cloud Functions or other paid features.
+## Security
 
-Target platform: **Android 7.0+** (tested on a physical Android 8.1 device).
+- **Least privilege by default:** customers read and change only their own
+  bookings and profile. Nobody can make themselves an admin; admin roles are
+  set only in the Firebase console.
+- **Rules are tested:** 22 automated tests check what guests, customers and
+  admins can and can't do, on a local emulator. A reviewed hardening proposal
+  is in [docs/phase4-security.md](docs/phase4-security.md).
+- **Bookings are history:** they can be cancelled but never deleted or edited.
+- **No secrets in the repository:** Firebase config files are generated locally
+  and git-ignored. All demos use made-up data on local emulators.
 
-## Project structure
+## Run it locally (no Firebase account needed)
 
-```
-lib/
-  main.dart              Initializes Firebase and reminders, starts the app
-  app.dart               MaterialApp, theme, and the providers (state + repositories)
-  firebase_options.dart  Generated by FlutterFire (not committed, see below)
-  core/
-    constants/           Spacing; booking rules (opening hours, slot length, ...)
-    navigation/          SnackBarDismisser (hides snackbars when the screen changes)
-    theme/               Material 3 theme
-    utils/               Validators, date/price formatting, Firebase error messages
-    widgets/             Reusable widgets (loading button, loading/empty/error views, ...)
-  features/
-    auth/                Login, register, auth state (Phase 1)
-    home/                HomeScreen: the bottom navigation bar
-    services/            Service model, repository, services list
-    bookings/
-      data/              Booking model, BookingRepository, BookingReminders
-      utils/             SlotCalculator (pure date/time logic)
-      screens/           Choose time, confirm booking, my bookings
-      widgets/           BookingCard
-    profile/             Profile screen (name, email, logout)
-test/                    Unit and widget tests
-firestore.rules          Firestore security rules
-```
-
-## Getting started
-
-### Prerequisites
-
-- Flutter SDK (stable channel) and an Android emulator or phone
-- A Firebase project with **Email/Password** sign-in and **Cloud Firestore** enabled
-- [Firebase CLI](https://firebase.google.com/docs/cli) and the FlutterFire CLI:
-  `dart pub global activate flutterfire_cli`
-- Android SDK Platform **37** (needed to compile `flutter_local_notifications`;
-  install it in Android Studio → SDK Manager → SDK Platforms)
-
-### 1. Get the dependencies
+You need Node.js 20.9+ and the Firebase CLI (`npm install -g firebase-tools`).
+For the app, you also need Flutter.
 
 ```
-flutter pub get
+cd admin_web
+npm install
+npm run emulators                     # terminal 1: local Auth + Firestore
+
+# terminal 2 (PowerShell)
+$env:FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080"
+$env:FIREBASE_AUTH_EMULATOR_HOST = "127.0.0.1:9099"
+npm run seed:emulator                 # "Glow Salon" demo data
+npm run test:rules                    # security rules tests
+npm run test:e2e:emulator             # dashboard tests in a real browser
 ```
 
-### 2. Connect your Firebase project (`firebase_options.dart`)
+Demo admin: `mona@glow-salon.example` / `demo-only-password` (works on the
+emulator only). Full setup, including connecting your own Firebase project and
+running the app on a phone: [docs/setup.md](docs/setup.md).
 
-The Firebase config files are **not in this repository**:
+## Project docs
 
-- `lib/firebase_options.dart`
-- `android/app/google-services.json`
-
-They are listed in `.gitignore`. Generate your own with:
-
-```
-firebase login
-flutterfire configure --project=<your-firebase-project-id> --platforms=android
-```
-
-Use `com.ahmed.booking_app` as the Android application ID (or change it in
-`android/app/build.gradle.kts` first).
-
-> **Are these files secret?** Not really. They identify your Firebase project
-> and are compiled into every app you ship. Your data is protected by
-> **Firebase Auth and Firestore security rules**, not by hiding these keys.
-> They are kept out of the repo to avoid automated key-scanner alerts and so
-> anyone cloning the project connects it to *their own* Firebase project.
-> Without `firebase_options.dart`, `flutter run` and `flutter analyze` report
-> a missing import; `flutter test` still works because tests don't use Firebase.
-
-### 3. Deploy the Firestore security rules
-
-```
-firebase deploy --only firestore:rules --project <your-firebase-project-id>
-```
-
-In short: users read/create only their own profile; signed-in users can read
-services and the anonymous `slots`; customers create and read only their own
-bookings and can only change one from `confirmed` to `cancelled`. See
-[docs/phase2-explained.md](docs/phase2-explained.md#5-the-security-rules-line-by-line)
-for a line-by-line explanation.
-
-### 4. Add the sample services
-
-Customers can't write services, so add them in the **Firebase console** (the
-console is an admin and isn't limited by the rules):
-
-1. Open the console → your project → **Firestore Database** → **Data**.
-2. Click **+ Start collection** (or **+ Add collection**). Collection ID: `services`.
-3. For the first document, set **Document ID** to `haircut` (don't use Auto-ID).
-4. Add the fields below, choosing the **type** for each one, then **Save**.
-5. In the `services` collection, click **+ Add document** for each remaining row.
-
-| Document ID  | name (string) | description (string)              | durationMinutes (number) | price (number) | active (boolean) |
-| ------------ | ------------- | --------------------------------- | ------------------------ | -------------- | ---------------- |
-| `haircut`    | Haircut       | Wash, cut and style               | 30                       | 25             | true             |
-| `beard-trim` | Beard trim    | Shape and trim with a hot towel   | 30                       | 15             | true             |
-| `coloring`   | Coloring      | Full color with a gloss finish    | 90                       | 60             | true             |
-| `styling`    | Styling       | Blow-dry and styling for an event | 60                       | 35             | true             |
-
-Field names are case-sensitive. `durationMinutes` and `price` must be of type
-**number** (not string), and `active` must be the **boolean** `true`.
-
-### 5. Run
-
-```
-flutter run
-```
-
-## Troubleshooting
-
-- **`Android sdkmanager did not install NDK 28.2.13676358`**: install that NDK
-  version in Android Studio (SDK Manager → SDK Tools → "Show Package Details" →
-  NDK (Side by side)), or run `sdkmanager "ndk;28.2.13676358"`.
-- **`Could not close incremental caches`** during a Kotlin compile (common on
-  Windows when the project and the Pub cache are on different drives):
-  `android/gradle.properties` already sets `kotlin.incremental=false` to avoid
-  it. If it still happens, run `cd android; .\gradlew --stop; cd ..` and
-  `flutter clean`, then build again.
-- **Services list is empty**: check the documents in step 4 exist and have
-  `active` set to the boolean `true`.
-- **"You do not have permission to do that" when booking**: the rules from step 3
-  haven't been deployed, or a service's `name`/`durationMinutes` was edited while
-  the app had the old values loaded. Restart the app.
-- **Reminder doesn't appear**: check notifications are allowed for the app. Some
-  phones (e.g. Huawei, Xiaomi) stop background alarms to save battery; allow the
-  app to run in the background / disable battery optimization for it. See
-  [dontkillmyapp.com](https://dontkillmyapp.com).
-
-## Development
-
-```
-flutter analyze   # static analysis (lints)
-flutter test      # unit and widget tests
-dart format .     # format the code
-```
-
-## Firestore data
-
-`users/{uid}`
-
-| Field       | Type      | Example            |
-| ----------- | --------- | ------------------ |
-| `name`      | string    | `"Ahmed"`          |
-| `email`     | string    | `"ahmed@mail.com"` |
-| `role`      | string    | `"customer"`       |
-| `createdAt` | timestamp | set by the server  |
-
-`services/{serviceId}` (added in the console)
-
-| Field             | Type    | Example                 |
-| ----------------- | ------- | ----------------------- |
-| `name`            | string  | `"Haircut"`             |
-| `description`     | string  | `"Wash, cut and style"` |
-| `durationMinutes` | number  | `30`                    |
-| `price`           | number  | `25`                    |
-| `active`          | boolean | `true`                  |
-
-`bookings/{autoId}` (readable only by its owner)
-
-| Field             | Type      | Example                       |
-| ----------------- | --------- | ----------------------------- |
-| `userId`          | string    | the customer's uid            |
-| `serviceId`       | string    | `"haircut"`                   |
-| `serviceName`     | string    | `"Haircut"`                   |
-| `startAt`         | timestamp | 17 Nov 2026, 10:00 local time |
-| `durationMinutes` | number    | `30`                          |
-| `status`          | string    | `"confirmed"` / `"cancelled"` |
-| `createdAt`       | timestamp | set by the server             |
-
-`slots/{serviceId}_{startAtMillis}` (one per taken time, no personal data)
-
-| Field       | Type      | Example                    |
-| ----------- | --------- | -------------------------- |
-| `serviceId` | string    | `"haircut"`                |
-| `startAt`   | timestamp | same as the booking        |
-| `bookingId` | string    | ID of the booking it holds |
+- [docs/setup.md](docs/setup.md): developer setup, data model, troubleshooting
+- [admin_web/README.md](admin_web/README.md): dashboard setup and tests
+- Plain-English walkthroughs: [phase 1](docs/phase1-explained.md) ·
+  [phase 2](docs/phase2-explained.md) · [phase 3](docs/phase3-explained.md) ·
+  [phase 4](docs/phase4-explained.md)

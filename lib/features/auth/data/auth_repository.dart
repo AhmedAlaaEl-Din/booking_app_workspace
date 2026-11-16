@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 import 'app_user.dart';
 
@@ -60,8 +61,9 @@ class AuthRepository {
       if (data != null) {
         return AppUser.fromMap(user.uid, data);
       }
-    } on FirebaseException {
-      // Ignore and use the fallback below.
+    } on FirebaseException catch (error) {
+      // Use the fallback below.
+      debugPrint('Profile fetch failed, using the Auth fallback: ${error.code}');
     }
     return AppUser(
       uid: user.uid,

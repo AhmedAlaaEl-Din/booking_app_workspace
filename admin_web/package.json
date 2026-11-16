@@ -1,0 +1,42 @@
+{
+  "name": "admin_web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:rules": "vitest run --config vitest.rules.config.mts",
+    "test:rules:proposed": "vitest run --config vitest.rules.config.mts --mode proposed",
+    "test:e2e": "playwright test --project=chromium",
+    "test:e2e:video": "playwright test --project=video",
+    "test:e2e:emulator": "playwright test --config playwright.emulator.config.ts",
+    "test:live": "playwright test --config playwright.live.config.ts",
+    "demo:video": "playwright test --config demo/playwright.demo.config.ts",
+    "emulators": "cd .. && firebase emulators:start --only auth,firestore --project demo-booking",
+    "seed:emulator": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/seed-emulator.ts"
+  },
+  "dependencies": {
+    "firebase": "^13.3.0",
+    "next": "16.4.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "@playwright/test": "^1.65.1",
+    "@tailwindcss/turbopack": "4.3.3",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.6",
+    "tailwindcss": "4.3.3",
+    "typescript": "^5",
+    "vitest": "^5.1.0"
+  }
+}
