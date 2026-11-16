@@ -6,9 +6,9 @@ dashboard**. Both share one secure Firebase backend.
 
 | Customer app (Flutter) | Admin dashboard (Next.js) |
 | ---------------------- | ------------------------- |
-| [![Customer app demo](https://img.youtube.com/vi/xjE2lHMbqQc/hqdefault.jpg)](https://www.youtube.com/shorts/xjE2lHMbqQc) | [![Admin dashboard demo](https://img.youtube.com/vi/4zeIR4EaPKc/hqdefault.jpg)](https://youtu.be/4zeIR4EaPKc) |
-| ▶ [Watch the app demo](https://www.youtube.com/shorts/xjE2lHMbqQc) | ▶ [Watch the dashboard demo](https://youtu.be/4zeIR4EaPKc) |
-| _Phase 4 customer recording: `<VIDEO LINK>`_ | _Phase 4 dashboard recording (with title card): `<VIDEO LINK>`_ |
+| [![Customer app demo](https://img.youtube.com/vi/Vx8c27PwZs8/hqdefault.jpg)](https://youtube.com/shorts/Vx8c27PwZs8) | [![Admin dashboard demo](https://img.youtube.com/vi/4zeIR4EaPKc/hqdefault.jpg)](https://youtu.be/4zeIR4EaPKc) |
+| ▶ [Watch the app demo](https://youtube.com/shorts/Vx8c27PwZs8) | ▶ [Watch the dashboard demo](https://youtu.be/4zeIR4EaPKc) |
+| | _Phase 4 dashboard recording (with title card): `<VIDEO LINK>`_ |
 
 <!-- Screenshots: replace with phone captures from demo_videos/ when ready. -->
 | Services | Choose a time | My bookings | Reminder |
