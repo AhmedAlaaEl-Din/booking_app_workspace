@@ -51,12 +51,22 @@
       "Bash(git push * -f)",
       "Bash(git push * -f *)",
       "Bash(firebase deploy:*)",
+      "Bash(firebase * deploy:*)",
+      "Bash(npx firebase deploy:*)",
+      "Bash(npx firebase-tools deploy:*)",
+      "Bash(firebase firestore:delete:*)",
+      "Bash(firebase auth:import:*)",
       "PowerShell(git push --force:*)",
       "PowerShell(git push -f:*)",
       "PowerShell(git push * --force*)",
       "PowerShell(git push * -f)",
       "PowerShell(git push * -f *)",
-      "PowerShell(firebase deploy:*)"
+      "PowerShell(firebase deploy:*)",
+      "PowerShell(firebase * deploy:*)",
+      "PowerShell(npx firebase deploy:*)",
+      "PowerShell(npx firebase-tools deploy:*)",
+      "PowerShell(firebase firestore:delete:*)",
+      "PowerShell(firebase auth:import:*)"
     ]
   }
 }

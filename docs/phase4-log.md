@@ -1,0 +1,24 @@
+# Phase 4 log
+
+## Summary
+
+_(Written at the end of the run.)_
+
+## Task list
+
+- [x] A1 CLAUDE.md emulator-only rules, `.claude/settings.json` deny list
+- [ ] A2 Emulator config in `firebase.json`, `admin_web/scripts/seed-emulator.ts`
+- [ ] A3 Emulators running in the background
+- [ ] B4 Rules unit tests (`@firebase/rules-unit-testing`)
+- [ ] B5 Admin dashboard states, lint, typecheck, unit tests, Playwright on the emulator
+- [ ] B6 Flutter: states, double-tap guards, booking-flow widget tests, analyze, test
+- [ ] C7–C12 Device run, recordings, screenshots, video edit
+- [ ] D13 Privacy check (OCR)
+- [ ] D14 README rewrite, `docs/phase4-explained.md`
+- [ ] D15 Secrets scan
+
+## Progress
+
+| Time (local) | Finished |
+| ------------ | -------- |
+| 2026-11-16 10:48 | A1: branch `phase4-polish`, emulator-only rules in CLAUDE.md, firebase deploy/delete commands denied in `.claude/settings.json` |

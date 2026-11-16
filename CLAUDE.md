@@ -28,8 +28,17 @@ Before saying a task is "done":
 - If a task seems to need one, stop and ask me.
 
 ## Firebase
-- Never deploy Firebase rules, indexes, or functions.
-- Prepare the changes (e.g. edit `firestore.rules`), explain them, and ask me to deploy.
+- Never deploy Firebase rules, indexes, or functions. No `firebase deploy` of any kind.
+- Never write to the live Firebase project (Auth or Firestore): no console edits,
+  no scripts or tests that use real credentials or the real project.
+- Development, tests, seeding and demos run against the Firebase Emulator Suite
+  only (Auth 127.0.0.1:9099, Firestore 127.0.0.1:8080, project `demo-booking`).
+  Scripts must refuse to run unless `FIRESTORE_EMULATOR_HOST` and
+  `FIREBASE_AUTH_EMULATOR_HOST` are set.
+- The Flutter app talks to the emulators only in debug builds started with
+  `--dart-define=USE_EMULATOR=true`. Release builds always ignore this switch.
+- Prepare rules changes in `firestore.rules.proposed`, explain them, and ask me
+  to review and deploy.
 
 ## Demo recordings and screenshots
 - Use demo accounts and fake data only.
