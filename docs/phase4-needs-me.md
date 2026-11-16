@@ -61,3 +61,14 @@ The app is ready for it. When you're back:
 4. Before recording, check the status bar: no notifications, Wi-Fi name or
    real account. Then record:
    `scrcpy --no-audio --show-touches --max-size 1280 --time-limit 60 --record demo_videos/raw/customer.mp4`
+
+## 4. Real project ID in `firebase.json`
+
+The scan found the real Firebase project ID and Android app ID in the
+`flutter` block of `firebase.json`. `flutterfire configure` wrote them there.
+They aren't secrets (they ship inside every app build), but you asked for no
+real project IDs in the README, and this file is public too. If you want it
+gone, delete the `"flutter": { … }` block. It's only used by
+`flutterfire configure` and will come back if you run it again. It's also in
+earlier commits, so removing it now doesn't erase it from history. I left the
+file as it is.
