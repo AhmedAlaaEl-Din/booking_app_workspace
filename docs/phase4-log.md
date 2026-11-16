@@ -7,8 +7,8 @@ _(Written at the end of the run.)_
 ## Task list
 
 - [x] A1 CLAUDE.md emulator-only rules, `.claude/settings.json` deny list
-- [ ] A2 Emulator config in `firebase.json`, `admin_web/scripts/seed-emulator.ts`
-- [ ] A3 Emulators running in the background
+- [x] A2 Emulator config in `firebase.json`, `admin_web/scripts/seed-emulator.ts`
+- [x] A3 Emulators running in the background
 - [ ] B4 Rules unit tests (`@firebase/rules-unit-testing`)
 - [ ] B5 Admin dashboard states, lint, typecheck, unit tests, Playwright on the emulator
 - [ ] B6 Flutter: states, double-tap guards, booking-flow widget tests, analyze, test
@@ -22,3 +22,4 @@ _(Written at the end of the run.)_
 | Time (local) | Finished |
 | ------------ | -------- |
 | 2026-11-16 10:48 | A1: branch `phase4-polish`, emulator-only rules in CLAUDE.md, firebase deploy/delete commands denied in `.claude/settings.json` |
+| 2026-11-16 10:49 | A2/A3: emulator ports in `firebase.json`, `admin_web/scripts/seed-emulator.ts` (5 services, admin Mona, 8 customers, 12 bookings; refuses to run without loopback emulator hosts, tested). Emulators running (Auth 9099, Firestore 8080). |

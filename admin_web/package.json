@@ -13,7 +13,9 @@
     "test:e2e": "playwright test --project=chromium",
     "test:e2e:video": "playwright test --project=video",
     "test:live": "playwright test --config playwright.live.config.ts",
-    "demo:video": "playwright test --config demo/playwright.demo.config.ts"
+    "demo:video": "playwright test --config demo/playwright.demo.config.ts",
+    "emulators": "cd .. && firebase emulators:start --only auth,firestore --project demo-booking",
+    "seed:emulator": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/seed-emulator.ts"
   },
   "dependencies": {
     "firebase": "^13.3.0",
