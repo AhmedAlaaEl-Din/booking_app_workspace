@@ -28,18 +28,15 @@ times off the 30-minute grid, and loose profile documents. Details and the
 access table are in `docs/phase4-security.md`. Rules tests pass against both
 files (22/22 each). Deploying is your call.
 
-## 3. Phone recording (Phase C, steps 7–10): skipped, the phone isn't authorized
+## 3. Phone recording: done (2026-11-16, after you authorized USB debugging)
 
-`adb devices` shows the Huawei (`58K6R19924012174`) as **unauthorized**. The
-"Allow USB debugging?" prompt has to be accepted on the phone itself. I
-restarted adb three times; it stayed unauthorized. So there's no customer-app
-recording and no phone screenshots.
+Recorded and checked; see the log (C7–C10). Two bugs in the Phase 4 emulator
+switch only showed up on the real phone, and both are fixed (decisions 9–10).
+To record again:
 
-The app is ready for it. When you're back:
-
-1. Unlock the phone and accept **Allow USB debugging** (tick "Always allow").
-2. Start the emulators and seed the namespace the app uses. The debug app keeps
-   its own project ID (see decision 4), so pass it to the seed script:
+1. Start the emulators and seed the namespace the app's Firestore uses. The
+   app keeps its own project ID (decision 4), so pass it to the seed script.
+   Auth accounts always go to `demo-booking` (decision 10):
    ```
    cd admin_web
    npm run emulators                                  # terminal 1
@@ -48,9 +45,10 @@ The app is ready for it. When you're back:
    $env:SEED_PROJECT_ID = "<your-firebase-project-id>"
    npm run seed:emulator
    ```
-3. Connect the phone to the emulators and run the debug app on them:
+   Re-seed after running the dashboard emulator tests: they reset the
+   `demo-booking` accounts, so the UIDs no longer match.
+2. Connect the phone to the emulators and run the debug app on them:
    ```
-   adb shell svc power stayon usb
    adb reverse tcp:8080 tcp:8080
    adb reverse tcp:9099 tcp:9099
    flutter run -d 58K6R19924012174 --debug --dart-define=USE_EMULATOR=true
@@ -58,9 +56,12 @@ The app is ready for it. When you're back:
    The log line `Using the Firebase emulators on 127.0.0.1 (debug only).`
    confirms it. Demo login: `lina.youssef@example.com` / `demo-only-password`
    (emulator only).
+3. Typing on this phone: its keyboard adds a space after the first "." of a
+   typed email and sometimes capitalizes it, even in an email field. Typing by
+   hand is fine; with `adb shell input`, check the field before going on.
 4. Before recording, check the status bar: no notifications, Wi-Fi name or
    real account. Then record:
-   `scrcpy --no-audio --show-touches --max-size 1280 --time-limit 60 --record demo_videos/raw/customer.mp4`
+   `scrcpy --no-audio --no-window --max-size 1280 --time-limit 55 --record demo_videos/raw/customer-app-demo.mp4`
 
 ## 4. Real project ID in `firebase.json`
 

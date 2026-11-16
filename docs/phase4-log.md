@@ -16,13 +16,15 @@
   widget tests. `flutter analyze` finds no issues; `flutter test` passes 53/53.
 - Dashboard video recorded on the emulator and edited: 8 long pauses
   shortened, plus a 2.5 s title card and end card (45.6 s).
+- Customer app recorded on the phone against the emulators (48.8 s): log in,
+  book a haircut, see it, cancel it, Past tab, profile, log out. Plus 3 phone
+  screenshots. Recording on the real phone exposed **two bugs in the emulator
+  switch**, both fixed (decisions 9 and 10).
 - README rewritten for clients; old setup guide moved to `docs/setup.md`.
   New `docs/phase4-explained.md`.
 - Secrets scan: no keys, credentials or real emails in tracked files.
 
 **Blocked**
-- Phone recording and screenshots (C8–C10): the phone shows as
-  **unauthorized** for USB debugging. The prompt must be accepted on the phone.
 - OCR privacy scan: **tesseract isn't installed**. NOT SCANNED, needs manual
   review. As a stand-in, I looked at 15 frames of the edited video myself (see
   D13).
@@ -32,20 +34,24 @@
 **Needs you** (`docs/phase4-needs-me.md`)
 1. Delete the leftover `9b8fea` E2E data in the live project (listed there; not touched).
 2. Review and deploy `firestore.rules.proposed`.
-3. Accept USB debugging on the phone, then record the customer app (commands are there).
+3. ~~Accept USB debugging and record the customer app~~: done after you
+   authorized the phone.
 4. Decide whether to remove the real project ID from `firebase.json`.
 
 **Where things are**
 - Edited dashboard video: `demo_videos/admin-dashboard-demo-edited.webm` (git-ignored)
 - Raw recording: `admin_web/evidence/demo/admin-dashboard-demo.webm` (git-ignored)
-- Phone screenshots: none (phone unauthorized)
+- Customer app video: `demo_videos/raw/customer-app-demo.mp4` (git-ignored)
+- Phone screenshots: `demo_videos/screenshots/` (services, choose-time,
+  my-bookings; git-ignored)
 
 **Risks noticed**
 - The proposed 30-minute start-time rule assumes whole half-hour UTC offsets
   (not true for Nepal or the Chatham Islands).
-- The debug app talks to the emulators under the **real** project ID string
-  (decision 4). It's safe, because every request goes to 127.0.0.1, but the
-  seed for the phone must use `SEED_PROJECT_ID`.
+- The debug app's Firestore uses the **real** project ID string on the
+  emulator (decision 4), while Auth uses `demo-booking` (decision 10). It's
+  safe, because every request goes to 127.0.0.1, but the phone needs a seed
+  with `SEED_PROJECT_ID`, redone after the dashboard emulator tests.
 - In emulator mode the app signs out at startup, so the phone's saved
   real-account login is cleared after a demo run.
 - The commit message of `2e7ca38` overstates the bug as "created two
@@ -60,7 +66,7 @@
 - [x] B4 Rules unit tests (`@firebase/rules-unit-testing`)
 - [x] B5 Admin dashboard states, lint, typecheck, unit tests, Playwright on the emulator
 - [x] B6 Flutter: states, double-tap guards, booking-flow widget tests, analyze, test
-- [ ] C7–C10 Device run, phone recording, screenshots: **blocked** (phone unauthorized)
+- [x] C7–C10 Device run, phone recording, screenshots (after you authorized the phone)
 - [x] C11–C12 Dashboard recording on the emulator, edited with title and end cards
 - [x] D13 Privacy check: OCR **NOT SCANNED** (no tesseract); 15 frames checked by eye
 - [x] D14 README rewrite, `docs/phase4-explained.md`
@@ -80,6 +86,11 @@
 | 2026-11-16 11:16 | C12: edited to `demo_videos/admin-dashboard-demo-edited.webm` (45.6 s, 1280×720 VP9). 8 still stretches over 1.8 s cut to 1.8 s (found by comparing frames); 2.5 s title and end cards. Built with Playwright's ffmpeg (WebM only) and Chromium for the cards. |
 | 2026-11-16 11:20 | D14: README rewritten for clients (features, mermaid diagram, stack, security, emulator quick start, video and screenshot placeholders, no real IDs or emails). Old README moved to `docs/setup.md`. Added `docs/phase4-explained.md`. |
 | 2026-11-16 11:25 | D13: see below. |
+| 2026-11-16 12:22 | C7 (resumed): phone authorized. The debug app's sign-in timed out: FlutterFire maps `127.0.0.1` to `10.0.2.2` on Android, which doesn't exist on a real phone. Fixed with `automaticHostMapping: false` (decision 9). |
+| 2026-11-16 12:35 | C8: profile name showed "—": Auth (namespace `demo-booking`) and Firestore (the app's project ID) gave different UIDs. The seed now always creates Auth accounts in `demo-booking` (decision 10). The full flow works on the phone. |
+| 2026-11-16 12:37 | C9: recorded `demo_videos/raw/customer-app-demo.mp4` with scrcpy (48.8 s, 720×1520 H.264): login, Haircut, Tue (09:30 greyed out), 11:00, confirm, My bookings, cancel, Past, Profile, log out. Rehearsed first with another demo customer. |
+| 2026-11-16 12:39 | C10: 3 screenshots in `demo_videos/screenshots/`. One earlier attempt caught the phone's home screen (a missed tap closed the app); it was deleted at once and isn't in the video. |
+| 2026-11-16 12:42 | Checks after the fixes: `flutter analyze` no issues, `flutter test` 53/53, `tsc` 0 errors, lint clean, rules 22/22, emulator e2e 4/4 (twice). One e2e test had a fragile locator (it matched Next.js's empty route announcer, also `role="alert"`); fixed. |
 
 ### D13 Privacy check
 
@@ -94,8 +105,16 @@ page, the edit dialog and deactivate. Only demo data is visible
 (`mona@glow-salon.example`, customers `@example.com`, "Glow Salon"). There's
 no browser address bar, no OS notifications, no Wi-Fi names, no gmail/yahoo
 addresses, no API keys, no Firebase console and no real names. The raw
-recording has the same content without the cards. There are no phone videos
-or screenshots to check.
+recording has the same content without the cards. (At first there were no
+phone videos or screenshots; see below.)
+
+**Phone video and screenshots (added after the phone was authorized).**
+Checked 17 frames of `customer-app-demo.mp4` (one every 3 s) and all 3
+screenshots. The status bar shows only signal, Wi-Fi and battery icons and the
+time, with no notifications and no network name. The app shows only demo data
+(Lina Youssef, `lina.youssef@example.com`, Glow Salon services). The keyboard's
+suggestion bar shows only demo emails. The notification shade and the settings
+were never opened.
 
 ### D15 Secrets scan (tracked files, 134)
 
