@@ -39,8 +39,19 @@ Future<void> main() async {
 /// Must run before anything else uses Auth or Firestore.
 Future<void> _connectToEmulators() async {
   debugPrint('Using the Firebase emulators on $_emulatorHost (debug only).');
-  await FirebaseAuth.instance.useAuthEmulator(_emulatorHost, 9099);
-  FirebaseFirestore.instance.useFirestoreEmulator(_emulatorHost, 8080);
+  // automaticHostMapping: false, because FlutterFire otherwise rewrites
+  // 127.0.0.1 to 10.0.2.2 (the Android *emulator's* host alias). On a real
+  // phone that address doesn't exist; `adb reverse` serves 127.0.0.1.
+  await FirebaseAuth.instance.useAuthEmulator(
+    _emulatorHost,
+    9099,
+    automaticHostMapping: false,
+  );
+  FirebaseFirestore.instance.useFirestoreEmulator(
+    _emulatorHost,
+    8080,
+    automaticHostMapping: false,
+  );
   // No offline cache: it could hold data from the real project.
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: false,
